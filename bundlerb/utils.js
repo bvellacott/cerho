@@ -1,4 +1,4 @@
-const { join, relative, resolve } = require('path')
+const { join } = require('path')
 
 const defaultConfig = {
   babel: {

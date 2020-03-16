@@ -26,6 +26,7 @@ const ssrJsx = (relativeModulePath, req, res) => {
   res.send(render(req, res))
 }
 
+app.use(express.static('static'))
 app.get(
   config.ssrPaths || [],
   (req, res, next) => ssrJsx('/src/index.jsx', req, res, next),
@@ -70,4 +71,4 @@ app.get('/*.css.map', (req, res) => {
 })
 app.use(express.static(process.cwd()))
 
-app.listen(4000);
+app.listen(5000);

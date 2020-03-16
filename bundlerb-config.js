@@ -59,7 +59,6 @@ module.exports = {
     'src',
   ],
   ssrPaths: [
-    '/aapp.html',
-    '/aapp/bapp.html',
+    '/index.html',
   ],
 }

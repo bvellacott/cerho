@@ -54,10 +54,15 @@
     "postcss-custom-properties": "^9.0.2",
     "postcss-nested": "^4.2.1",
     "preact": "^10.3.1",
+    "preact-context": "^1.1.4",
+    "preact-redux": "^2.1.0",
     "preact-render-to-string": "^5.1.4",
-    "shelljs": "^0.8.3"
+    "react-redux": "^7.2.0",
+    "redux": "^4.0.5",
+    "shelljs": "^0.8.3",
+    "tslib": "^1.11.1"
   },
   "moduleAliases": {
-    "@/components": "./src/components"
+    "@/": "./src/"
   }
 }

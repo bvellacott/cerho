@@ -1,0 +1,33 @@
+/* https://developer.mozilla.org/en-US/docs/Web/HTML/Element#Forms */
+
+label {
+  width: 100%;
+  text-align: left;
+  font-weight: bold;
+  font-size: 2.0rem;
+}
+
+input, select, textarea {
+  width: 100%;
+  line-height: 3.8rem;
+  font-size: 2.0rem;
+  color: var(--steelblue);
+  border: solid 0.1rem var(--steelblue);
+  padding: 0 1rem;
+}
+
+input[type="checkbox"] {
+  width: initial;
+}
+
+button {
+  width: 100%;
+  display: inline-block;
+  padding: 1.0rem;
+  background: var(--steelblue);
+  color: var(--azure);
+  border-radius: 0.5rem;
+  font-size: 2.0rem;
+  font-weight: bold;
+  text-align: center;
+}

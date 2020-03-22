@@ -11,7 +11,7 @@ import {
 } from '@/utils'
 
 const configureStore = () => {
-	const isDev = process.env.NODE_ENV === 'development'
+	const isDev = process.env.NODE_ENV === 'dev'
 	
 	const asyncContext = {}
 	const asyncMiddleware = createAsyncMiddleware(asyncContext)
@@ -34,8 +34,7 @@ const configureStore = () => {
 	}
 	
 	const store = createStore(
-    // combineReducers(reducers),
-    (state, action) => {},
+    combineReducers(reducers),
 		enhancer,
 	)
 	

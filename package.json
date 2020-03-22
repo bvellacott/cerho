@@ -54,6 +54,7 @@
     "postcss-custom-properties": "^9.0.2",
     "postcss-nested": "^4.2.1",
     "preact": "^10.3.1",
+    "preact-compat": "^3.19.0",
     "preact-context": "^1.1.4",
     "preact-redux": "^2.1.0",
     "preact-render-to-string": "^5.1.4",
@@ -63,6 +64,8 @@
     "tslib": "^1.11.1"
   },
   "moduleAliases": {
-    "@/": "./src/"
+    "^@/": "./src/",
+    "^react$": "preact/compat",
+    "^react-dom$": "preact/compat"
   }
 }

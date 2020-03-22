@@ -8,7 +8,7 @@ var Module = module.constructor.length > 1
   : BuiltinModule
 
 const aliases = Object.keys(moduleAliases || {}).map(alias => ({
-  regex: new RegExp(`^${alias}`),
+  regex: new RegExp(alias),
   aliasedPath: moduleAliases[alias],
 }))
   
@@ -17,7 +17,7 @@ const transformAlias = (path, basedir = process.cwd()) => {
     const { regex, aliasedPath } = aliases[i];
     if (regex.test(path)) {
       const noAlias = path.replace(regex, '')
-      return join(basedir, aliasedPath, noAlias)
+      return join(path.startsWith('@/') ? basedir : '', aliasedPath, noAlias)
     }
   }
   return path;

@@ -1,5 +1,5 @@
-import subscribing from './subscribing'
+import subscriptions from './subscriptions'
 
 export default [
-  ...subscribing,
+  ...subscriptions,
 ]

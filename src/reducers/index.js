@@ -1,9 +1,9 @@
-// import * as files from '@/reducers/files'
+import * as subscriptions from '@/reducers/subscriptions'
 // import * as history from '@/reducers/history'
 // import * as initialisation from '@/reducers/initialisation'
 
 export default {
-	// ...files,
+	...subscriptions,
 	// ...history,
 	// ...initialisation,
 }

@@ -1,4 +1,8 @@
 import { h } from 'preact'
+import { connect } from 'react-redux'
+
+import { getSubscribers } from '@/selectors/subscriptions'
+
 import './reset.css'
 import './base.css'
 import './text-content.css'
@@ -6,7 +10,14 @@ import './forms.css'
 import './content-sectioning.scss'
 import './App.scss'
 
-function App({ path }) {
+const mapStateToProps = (state) => ({
+  subscribers: getSubscribers(state),
+})
+
+function App({
+  path,
+  subscribers,
+}) {
   return (
     <div className="App">
       <main>
@@ -14,6 +25,7 @@ function App({ path }) {
         <h1>Ilmoittaudu Lielahden kirkon koodaus kerhoon</h1>
         <h2>Ti. 7.4.2020</h2>
         <h2>Klo. 18:00</h2>
+        <h2>Ilmoittautuneita: {subscribers.length}</h2>
         <form>
           <label for="first-name">Etunimi<input id="first-name" type="text" /></label>
           <label for="last-name">Sukunimi <input id="last-name" type="text" /></label>
@@ -30,4 +42,4 @@ function App({ path }) {
   );
 }
 
-export default App;
+export default connect(mapStateToProps)(App);

@@ -1,8 +1,8 @@
 import { h, render } from 'preact'
-import { Provider } from 'preact-redux'
+import { Provider } from 'react-redux'
 import App from '@/App';
 import configureStore from '@/store'
-import { getSubscriptions } from '@/actions/subscriptions'
+import { loadSubscriptionsSheet } from '@/actions/subscriptions'
 
 import './index.scss';
 
@@ -19,7 +19,7 @@ const init = () => {
     </Provider>
   );
   
-  store.dispatch(getSubscriptions())
+  store.dispatch(loadSubscriptionsSheet())
 
   render(<Main />, document.body)
 }

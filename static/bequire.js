@@ -3,6 +3,8 @@
 window.define = (function initialiseDefine() {
   var assetRoot = window.ASSET_ROOT || ''
   var isOpera = typeof opera !== 'undefined' && opera.toString() === '[object Opera]';
+  
+  function require(url) { return window.define.modules[url].exports; }
 
   function getScriptFrom(evt) {
     //Using currentTarget instead of target for Firefox 2.0's sake. Not
@@ -38,6 +40,8 @@ window.define = (function initialiseDefine() {
         return module;
       } else if (url === 'exports') {
         return module.exports
+      } else if (url === 'require') {
+        return require
       }
       return define.modules[url].exports;
     }).concat(module));
@@ -60,7 +64,8 @@ window.define = (function initialiseDefine() {
       const dependency = define.modules[url];
       const hasNotLoaded = 
         url !== 'exports' &&
-        url !== 'module' && (
+        url !== 'module' && 
+        url !== 'require' && (
           !dependency || 
           dependency.status !== 'loaded'
         );
@@ -112,7 +117,7 @@ window.define = (function initialiseDefine() {
     var target = document.head;
 
     depUrls.forEach(function (url) {
-      if (define.modules[url] || url === 'module' || url === 'exports') {
+      if (define.modules[url] || url === 'module' || url === 'exports' || url === 'require') {
         return;
       }
 

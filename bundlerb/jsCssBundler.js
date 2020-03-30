@@ -3,9 +3,8 @@ const { basename } = require('path')
 const jsCssBundler = {
   matcher: /\.js$/,
   bundle: (module, flattenedWithoutPrior, index, concat) => {
-    flattenedWithoutPrior
+    [...flattenedWithoutPrior]
       .filter(module => module.css)
-      .reverse()
       .forEach(({ sourceMapFilename, css: { result: { css, map }}}) =>
       concat.add(sourceMapFilename, css, index.sourcemaps && map ? map.toString() : undefined))
     module.jsCss = module.jsCss || { result: {} }

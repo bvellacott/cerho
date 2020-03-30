@@ -3,10 +3,13 @@ const resolve = require('resolve')
 const nodeLibs = require('node-libs-browser') // this is to mock the node libraries for the browser
 const { isModule } = require('@babel/helper-module-transforms')
 const { transformAlias } = require('../../aliases')
+const { requireConfig } = require('../../utils')
+
+const { moduleOverrides = {} } = requireConfig()
 
 const packageFilter = pkg => ({
   ...pkg,
-  main: pkg.module || pkg.main,
+  main: moduleOverrides[pkg.name] || pkg.module || pkg.main,
 })
 
 const requireToPath = (req, filedir, basedir) =>

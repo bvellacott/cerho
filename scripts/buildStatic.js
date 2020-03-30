@@ -1,6 +1,6 @@
 const shell = require('shelljs')
-const { join } = require('path')
-const { ssrPaths = [] } = require(`${process.cwd()}/package.json`)
+const { requireConfig } = require('./utils')
+const { ssrPaths = [] } = requireConfig()
 
 if (!shell.which('wget')) {
   shell.echo('Sorry, this script requires wget')

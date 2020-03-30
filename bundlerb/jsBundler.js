@@ -3,7 +3,6 @@ const { basename } = require('path')
 const jsBundler = {
   matcher: /\.js$|\.mjs$/,
   bundle: (module, flattenedWithoutPrior, index, concat) => {
-    const flattenedWithoutPriorReversed = flattenedWithoutPrior.reverse()
     if (index.supportAsyncRequire) {
       concat.add(null, `window.define.priorIds.push(${module.id});`)
       if (index.loadStyles) {
@@ -12,8 +11,8 @@ const jsBundler = {
         )
       }
     }
-    for (let i = 0; i < flattenedWithoutPriorReversed.length; i++) {
-      const { path, sourceMapFilename, js } = flattenedWithoutPriorReversed[i]
+    for (let i = 0; i < flattenedWithoutPrior.length; i++) {
+      const { path, sourceMapFilename, js } = flattenedWithoutPrior[i]
       if (!js) {
         throw new Error(`the module '${path} has no js target'`)
       } else if (!js.result) {

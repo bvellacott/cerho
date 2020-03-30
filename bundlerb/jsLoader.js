@@ -27,7 +27,7 @@ const loadJsDependencies = api => (module, index) => new Promise((resolve, rejec
     }, 
     async (err, result = {}) => {
       if (err) {
-        return reject(err)
+        return reject(new BBError(`Failed find dependencies for '${module.path}'`, err))
       }
       try {
         module.dependencies.push(...(await api.resolveModules(module.js.dependencyPaths, index)))

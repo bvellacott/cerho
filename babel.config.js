@@ -9,6 +9,6 @@ module.exports = function(api) {
         throwIfNamespace: false,
       }],
     ],
-    sourceMaps: true
+    sourceMaps: true,
   };
 }

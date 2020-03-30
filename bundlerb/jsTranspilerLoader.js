@@ -22,7 +22,7 @@ const transpileJs = (module, index) => new Promise((resolve, reject) => {
   }
   const callback = (err, result = {}) => {
     if (err) {
-      return reject(err)
+      return reject(new BBError(`Failed to transpile module '${module.path}'`, err))
     }
     try {
       module.js.result = result

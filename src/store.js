@@ -11,7 +11,7 @@ import {
 } from '@/utils'
 
 const configureStore = () => {
-	const isDev = process.env.NODE_ENV === 'dev'
+	const isDev = process.env.NODE_ENV === 'development'
 	
 	const asyncContext = {}
 	const asyncMiddleware = createAsyncMiddleware(asyncContext)

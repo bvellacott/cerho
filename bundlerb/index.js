@@ -65,7 +65,11 @@ const api = {
     modulePath = modulePath.replace(/^\//, '').replace(new RegExp(`\\${index.mapFileSuffix}$`), '')
     index.rootModulePath = modulePath
     try {
-      return await api.resolveModule(modulePath, index, context)
+      const module = await api.resolveModule(modulePath, index, context)
+      if (module.resolvingPromise) {
+        await module.resolvingPromise
+      }
+      return module
     } catch (e) {
       const module = index.modulesByPath[modulePath]
       if (module) {
@@ -87,7 +91,7 @@ const api = {
           filenameRelative: relative(index.basedir, join(index.basedir, modulePath)),
           path: modulePath,
           dependencies: [],
-          dependants: [],
+          dependants: {},
           sourceMapFilename: relative(
             join(index.basedir, dirname(index.req.path)),
             join(index.basedir, modulePath),
@@ -98,10 +102,11 @@ const api = {
         module.id = index.modulesArray.length - 1
         module.commonRootTransform = TransformImportsToCommonRoot(module)
       } else if (module.resolvingPromise) {
-        return module.resolvingPromise
+        return module
       }
       const resolvingPromise = (async () => {
         await Promise.all(index.resolvers.map(resolve => resolve(module, index, context)))
+        module.dependencies.forEach(({ dependants }) => dependants[module.id] = module)
         await api.resolveModules(module.dependencies.map(({ path }) => path), index, false, context)
         return module
       })()
@@ -124,7 +129,7 @@ const api = {
     const module = index.modulesByPath[modulePath]
     api.invalidateCaches(module, index)
     module.dependencies = []
-    module.dependants = []
+    module.dependants = {}
     try {
       for (let i = 0; i < index.loaders.length; i++) {
         const { matcher, load } = index.loaders[i]
@@ -150,17 +155,22 @@ const api = {
         }
         const priorModules = {}
         api.flatten(index.modulesArray[id], priorModules)
-        Object.keys(priorModules).map(id => { ids[id] = true })
+        Object.keys(priorModules).forEach(id => { ids[id] = true })
         return ids
       }, {})
+
     const alreadyResolved = {}
-    const flattenedWithoutPrior = api.flatten(module).filter(module => {
-      if (alreadyResolved[module.id] || priorIds[module.id]) {
-        return false
-      }
-      alreadyResolved[module.id] = module
-      return true
-    })
+    const flattenedWithoutPrior = api
+      .flatten(module)
+      .reverse()
+      .filter(module => {
+        if (alreadyResolved[module.id] || priorIds[module.id]) {
+          return false
+        }
+        alreadyResolved[module.id] = module
+        return true
+      })
+
     res.setHeader('loaded-root-ids', module.id)
     return Promise.all(index.bundlers
       .filter(({ matcher }) => matcher && matcher.test(module.path, module))
@@ -182,17 +192,47 @@ const api = {
       }, []))
   },
 
-  flatten: (module, modules = {}, inResolveOrder = []) => {
+  findCircularModules: (module, path = [], circularModules = {}) => {
+    let isCircularMember = false; 
+    for (let i = 0; i < path.length; i++) {
+      const pathMember = path[i]
+      if (pathMember === module) {
+        isCircularMember = true
+      }
+      if (isCircularMember) {
+        pathMember.isCircularMember = isCircularMember
+        circularModules[pathMember.id] = pathMember
+      }
+    }
+    if (!isCircularMember) {
+      module.dependencies.forEach(dependency =>
+        api.findCircularModules(dependency, [...path, module], circularModules)
+      )
+    }
+    return circularModules
+  },
+
+  flattenNonCircular: (module, modules = {}, inResolveOrder = []) => {
     modules[module.id] = module
     inResolveOrder.push(module)
     if (module.dependencies) {
-      for (let i = 0; i < module.dependencies.length; i++) {
+      for (let i = module.dependencies.length - 1; i >= 0; i--) {
         const dependency = module.dependencies[i]
-        if (!modules[dependency.id]) {
-          api.flatten(dependency, modules, inResolveOrder)
+        if (!dependency.isCircularMember) {
+          api.flattenNonCircular(dependency, modules, inResolveOrder)
         }
       }
     }
+    return inResolveOrder
+  },
+
+  flatten: (module, modules = {}, inResolveOrder = []) => {
+    const circularModules = api.findCircularModules(module)
+    const modulesToFlatten = Object.values(circularModules)
+    if (!circularModules[module.id]) {
+      modulesToFlatten.unshift(module)
+    }
+    modulesToFlatten.forEach(mtf => api.flattenNonCircular(mtf, modules, inResolveOrder))
     return inResolveOrder
   },
 

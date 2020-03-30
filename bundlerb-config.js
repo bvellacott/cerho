@@ -2,8 +2,9 @@ const postcssNested = require('postcss-nested')
 const cssnano = require('cssnano')
 const postcssCustomProperties = require('postcss-custom-properties')
 
-const addMissingExport = require('./bundlerb/babel-plugins/transform-add-missing-exports-to-amd').default
+const addMissingRequireMisc = require('./bundlerb/babel-plugins/transform-add-missing-require-misc-to-amd').default
 
+const isProd = process.env.NODE_ENV === 'production'
 
 module.exports = {
   // loaded before babel.config.js
@@ -12,23 +13,32 @@ module.exports = {
     // ensures that babel is able to parse the files, but doesn't
     // need to perform any transformations
     clientSyntaxPlugins: [
-      '@babel/plugin-syntax-jsx',
+      ['@babel/plugin-transform-react-jsx', {
+        pragma: 'h',
+        pragmaFrag: 'Fragment',
+        throwIfNamespace: false,
+      }],
       '@babel/plugin-proposal-class-properties',
     ],
     client: {
       // runs after all dependecies are resolved
       // these should perform all necessary transformations
       // for the browser
-      presets: process.env.NODE_ENV === 'prod' ? [
-        '@babel/preset-env',
-        'minify',
-      ] : undefined,
+      presets: [
+        [
+          '@babel/preset-env', {
+            modules: 'amd',
+          },
+        ],
+      ],
       plugins: [
         '@babel/plugin-transform-classes',
-        ['@babel/plugin-transform-modules-amd'],
-        addMissingExport,
+        addMissingRequireMisc,
       ],
-      sourceMaps: true
+      sourceMaps: true,
+      minified: isProd,
+      compact: isProd,
+      comments: !isProd,
     },
     server: {
       // plugins to ensure ssr runs
@@ -47,7 +57,7 @@ module.exports = {
         ],
         preserve: false,
       }),
-      process.env.NODE_ENV === 'prod' ? cssnano({
+      process.env.NODE_ENV === 'production' ? cssnano({
         preset: 'default',
       }) : undefined,
     ].filter(plugin => plugin),
@@ -61,4 +71,7 @@ module.exports = {
   ssrPaths: [
     '/index.html',
   ],
+  moduleOverrides: {
+    'hoist-non-react-statics': 'src/index.js',
+  },
 }

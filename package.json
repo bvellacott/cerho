@@ -4,9 +4,9 @@
   "description": "bundles on the fly",
   "main": "index.js",
   "scripts": {
-    "start": "NODE_ENV=dev node bundlerb/asset-server/index.js",
-    "start:debug": "NODE_ENV=dev node --inspect-brk bundlerb/asset-server/index.js",
-    "start:prod": "NODE_ENV=prod node bundlerb/asset-server/index.js",
+    "start": "NODE_ENV=development node bundlerb/asset-server/index.js",
+    "start:debug": "NODE_ENV=development node --inspect-brk bundlerb/asset-server/index.js",
+    "start:prod": "NODE_ENV=production node bundlerb/asset-server/index.js",
     "build:static": "node ./scripts/buildStatic.js"
   },
   "repository": {
@@ -35,7 +35,7 @@
     "not IE_Mob 11"
   ],
   "dependencies": {
-    "@babel/core": "^7.8.4",
+    "@babel/core": "^7.9.0",
     "@babel/plugin-proposal-class-properties": "^7.8.3",
     "@babel/plugin-syntax-jsx": "^7.8.3",
     "@babel/plugin-transform-classes": "^7.8.3",
@@ -43,8 +43,8 @@
     "@babel/plugin-transform-modules-amd": "^7.8.3",
     "@babel/plugin-transform-modules-commonjs": "^7.8.3",
     "@babel/plugin-transform-react-jsx": "^7.8.3",
+    "@babel/polyfill": "^7.8.7",
     "@babel/preset-env": "^7.8.4",
-    "babel-preset-minify": "^0.5.1",
     "concat-with-sourcemaps": "^1.1.0",
     "cssnano": "^4.1.10",
     "express": "^4.17.1",
@@ -56,7 +56,6 @@
     "preact": "^10.3.1",
     "preact-compat": "^3.19.0",
     "preact-context": "^1.1.4",
-    "preact-redux": "^2.1.0",
     "preact-render-to-string": "^5.1.4",
     "react-redux": "^7.2.0",
     "redux": "^4.0.5",

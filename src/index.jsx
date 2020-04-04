@@ -1,13 +1,13 @@
 import { h } from 'preact'
 import render from 'preact-render-to-string';
-import { Provider } from 'react-redux'
+import { Provider } from 'redux-zero/preact'
 
 import configureStore from '@/store'
 
 import App from './App';
 
 export default (req, res) => {
-  const [store, asyncContext] = configureStore()
+  const store = configureStore()
   return render(
     <html>
     <head>
@@ -16,10 +16,7 @@ export default (req, res) => {
       <link rel="stylesheet" href="/src/index.jscss" />
     </head>
     <body>
-      <Provider
-        store={store}
-        asyncContext={asyncContext}
-      >
+      <Provider store={store}>
         <App path={req.path} />
       </Provider>
       <script>

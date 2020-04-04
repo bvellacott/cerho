@@ -1,5 +1,5 @@
 import { h } from 'preact'
-import { connect } from 'react-redux'
+import { connect } from 'redux-zero/preact'
 
 import { getSubscribers } from '@/selectors/subscriptions'
 

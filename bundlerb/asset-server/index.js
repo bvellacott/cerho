@@ -27,6 +27,13 @@ const ssrJsx = (relativeModulePath, req, res) => {
 }
 
 app.use(express.static('static'))
+if (config.discardPaths && config.discardPaths.length) {
+  app.get(config.discardPaths, (req, res, next) => {
+    res.setHeader('Content-Type', 'text/plain;charset=UTF-8')
+    res.send('')
+    // console.log('DISCARDED:', req.path)
+  })
+}
 app.get(
   config.ssrPaths || [],
   (req, res, next) => ssrJsx('/src/index.jsx', req, res, next),

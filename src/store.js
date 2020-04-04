@@ -1,44 +1,23 @@
-import {
-	createStore,
-	combineReducers,
-	applyMiddleware,
-	compose,
-} from 'redux'
-import reducers from '@/reducers'
-import createAsyncMiddleware from '@/async/middleware'
-import {
-	getWindow,
-} from '@/utils'
+import createStore from 'redux-zero'
+import { applyMiddleware } from "redux-zero/middleware";
+import { connect } from "redux-zero/devtools";
+
+const createInitialState = () => ({
+	subscriptions: {},
+})
 
 const configureStore = () => {
 	const isDev = process.env.NODE_ENV === 'development'
 	
-	const asyncContext = {}
-	const asyncMiddleware = createAsyncMiddleware(asyncContext)
-	const middleware = applyMiddleware(asyncMiddleware)
-	
-	let enhancer
-	if (isDev) {
-    const window = getWindow();
-		const composeEnhancers =
-			typeof window === 'object' &&
-			window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ?
-				window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
-				}) : compose
-	
-		enhancer = composeEnhancers(
-			middleware,
-		)
-	} else {
-		enhancer = middleware
-	}
+	const initialState = createInitialState()
+	const middlewares = (isDev && connect) ? applyMiddleware(connect(initialState)) : [];
 	
 	const store = createStore(
-    combineReducers(reducers),
-		enhancer,
+		initialState,
+		middlewares,
 	)
 	
-	return [store, asyncContext]
+	return store
 }
 
 export default configureStore

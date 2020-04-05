@@ -5,6 +5,11 @@ export const getWindow = () =>
 
 export const getDocument = () => getWindow().document || {}
 
+export const getLocalStorage = () => getWindow().localStorage || {
+  getItem: () => {},
+  setItem: () => {},
+}
+
 export const getCookie = name => (getDocument().cookie || '')
   .replace(new RegExp(`(?:(?:^|.*;\s*)${name}\s*\=\s*([^;]*).*$)|^.*$`), "$1")
 

@@ -17,7 +17,6 @@ const init = () => {
   )
   
   const bound = bindActions({ loadSubscriptionsSheet }, store)
-  console.log(bound)
   bound.loadSubscriptionsSheet()
 
   render(<Main />, document.body)

@@ -2,13 +2,8 @@ module.exports = function(api) {
   api.cache(true);
   return {
     plugins: [
-      '@babel/plugin-transform-destructuring',
-      ['@babel/plugin-transform-react-jsx', {
-        pragma: 'h',
-        pragmaFrag: 'Fragment',
-        throwIfNamespace: false,
-      }],
+      // plugins added here, will run on both server and client,
+      // but currently sourcemaps won't oblige
     ],
-    sourceMaps: true,
   };
 }

@@ -8,7 +8,6 @@ const loadJsDependencies = api => (module, index) => new Promise((resolve, rejec
   const { code, ast } = result || {}
   module.js.dependencyPaths = module.js.dependencyPaths || []
   const babelOptions = {
-    ...index.defaultBabelOptions,
     cwd: index.basedir,
     moduleId: module.path,
     filename: join(index.basedir, module.path),
@@ -17,14 +16,11 @@ const loadJsDependencies = api => (module, index) => new Promise((resolve, rejec
     plugins: [
       ...index.syntaxPlugins,
       module.commonRootTransform,
-    ]
+    ],
   }
   babel[ast ? 'transformFromAst' : 'transform'](
     ast || code || module.js.contents, 
-    {
-      ...babelOptions,
-      sourceMaps: true,
-    }, 
+    babelOptions,
     async (err, result = {}) => {
       if (err) {
         return reject(new BBError(`Failed find dependencies for '${module.path}'`, err))

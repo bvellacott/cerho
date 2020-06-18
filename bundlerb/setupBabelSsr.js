@@ -5,16 +5,21 @@ const watch = require('node-watch')
 const babel = require('@babel/core')
 const BBError = require('./BBError')
 const { requireConfig } = require('./utils')
+const nodeModulesRegex = require('node-modules-regexp')
 
 const setupBabelSsr = (index) => {
 	const config = requireConfig()
 	
 	const handleNonJs = (contents, filename) => {
 		index.nonJsFiles[filename] = contents
-		return ''
+		return ''																																			
 	}
 
 	const handleJsx = (contents, filename) => {
+		if (nodeModulesRegex.test(filename)) {
+			return contents
+		}
+
 		if (filename.endsWith('.svg')) {
 			contents = `
 import { h } from 'preact'
@@ -25,8 +30,14 @@ export default () => ${contents.replace(/\n/g, '')}
 		return transformed.code
 	}
 	
-	addHook(handleJsx, { exts: ['.js', '.jsx', '.svg'] })
-	addHook(handleNonJs, { exts: index.nonJsExtensions })
+	addHook(handleJsx, {
+		exts: ['.js', '.jsx', '.svg'],
+		ignoreNodeModules: false,
+	})
+	addHook(handleNonJs, {
+		exts: index.nonJsExtensions,
+		ignoreNodeModules: false,
+	})
 	
 	watch(
 		(config.nodeWatchPaths || []).map(

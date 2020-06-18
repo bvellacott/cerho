@@ -1,11 +1,10 @@
-const { setupAliases } = require('../aliases')
-setupAliases()
+require('bueno-repo').setupAliases()
 
 const { join } = require('path')
 const express = require('express')
 const { setupBabelSsr } = require('../setupBabelSsr')
-const { requireConfig } = require('../utils')
 const { buildIndex, bundlerBee } = require('..')
+const { requireConfig } = require('../utils')
 
 const config = requireConfig()
 
@@ -26,7 +25,10 @@ const ssrJsx = (relativeModulePath, req, res) => {
   res.send(render(req, res))
 }
 
-app.use(express.static('static'))
+app.get('*', (req, res, next) => {
+  // console.log('CALLING:', req.path)
+  next()
+})
 if (config.discardPaths && config.discardPaths.length) {
   app.get(config.discardPaths, (req, res, next) => {
     res.setHeader('Content-Type', 'text/plain;charset=UTF-8')
@@ -34,10 +36,13 @@ if (config.discardPaths && config.discardPaths.length) {
     // console.log('DISCARDED:', req.path)
   })
 }
-app.get(
-  config.ssrPaths || [],
-  (req, res, next) => ssrJsx('/src/index.jsx', req, res, next),
-)
+app.use(express.static('static'))
+if (config.ssrIndex) {
+  app.get(
+    config.ssrPaths || [],
+    (req, res, next) => ssrJsx(config.ssrIndex, req, res, next),
+  )
+}
 app.get(['/*.jsx'], ssrJsx)
 app.get(['/*.js', '/*.js.map', '/*.mjs', '/*.mjs.map', '/*.scss', '/*.scss.map', '/*.css', '/*.css.map'],
   (req, res, next) => {
@@ -45,7 +50,7 @@ app.get(['/*.js', '/*.js.map', '/*.mjs', '/*.mjs.map', '/*.scss', '/*.scss.map',
     return bundler(req, res, next)
   })
 app.get(['/*.jscss', '/*.jscss.map'], (req, res, next) => {
-  req.modulePath = req.path.replace(/\.jscss$/, '.js')
+  req.modulePath = req.path.replace(/\.jscss/, '.js')
   return bundler(req, res, next)
 })
 app.get(['/*.js', '/*.mjs'], (req, res) => {
@@ -68,6 +73,10 @@ app.get('/*.jscss', (req, res) => {
   res.setHeader('Content-Type', 'text/css;charset=UTF-8')
   res.send(req.module.jsCss.result.concat.content)
 })
+app.get('/*.jscss.map', (req, res) => {
+  res.setHeader('Content-Type', 'text/css;charset=UTF-8')
+  res.send(req.module.jsCss.result.concat.sourceMap)
+})
 app.get('/*.scss.map', (req, res) => {
   res.setHeader('Content-Type', 'application/json;charset=UTF-8')
   res.send(req.module.css.result.concat.sourceMap)
@@ -78,4 +87,4 @@ app.get('/*.css.map', (req, res) => {
 })
 app.use(express.static(process.cwd()))
 
-app.listen(5000);
+app.listen(4000);

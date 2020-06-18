@@ -2,6 +2,10 @@ const {
   identifier,
   stringLiteral,
 } = require('@babel/types')
+const {
+  isValidRequireCall,
+  isValidDefinePropertyCallOnExports,
+} = require('../../utils')
 
 const TransformAddMissingRequireMisc = () => {
   return function() {
@@ -37,14 +41,14 @@ const TransformAddMissingRequireMisc = () => {
       return false
     }
 
-    function addDefineParam(paramName, defineCallExpression) {
+    function addDefineParam(dependencyName, defineCallExpression, paramName) {
       try {
         const arrayExpression = defineCallExpression.node.arguments[1]
         const functionExpression = defineCallExpression.node.arguments[2]
         const elements = arrayExpression.elements
         const params = functionExpression.params
-        elements.unshift(stringLiteral(paramName))
-        params.unshift(identifier(paramName))
+        elements.unshift(stringLiteral(dependencyName))
+        params.unshift(identifier(paramName || dependencyName))
         functionExpression.params = params
         arrayExpression.elements = elements
       } catch (e) {
@@ -52,7 +56,7 @@ const TransformAddMissingRequireMisc = () => {
       }
     }
 
-    const RequireMiscVisitor = () => {
+    const RequireMiscVisitor = (requireDependencies) => {
       const visitor = {
         AssignmentExpression(assignmentExpression) {
           if (assignmentExpression.get('left').isMemberExpression()) {
@@ -71,11 +75,14 @@ const TransformAddMissingRequireMisc = () => {
           }
         },
         CallExpression(requireCall) {
-          if (
-            requireCall.get('callee').isIdentifier({ name: 'require' }) &&
-            !requireCall.scope.getBinding('require')
-          ) {
+          if (isValidRequireCall(requireCall)) {
             visitor.hasUnpassedRequire = true;
+            requireDependencies.push(requireCall.node.arguments[0].value)
+          }
+        },
+        ExpressionStatement(definePropertyCall) {
+          if (isValidDefinePropertyCallOnExports(definePropertyCall)) {
+            visitor.hasUnpassedExports = true;
           }
         },
       }
@@ -85,11 +92,16 @@ const TransformAddMissingRequireMisc = () => {
     const AmdVisitor = () => ({
       CallExpression(callExpression) {
         if (!isValidDefineCall(callExpression)) return
-        const visitor = RequireMiscVisitor()
+        const requireDependencies = []
+        const visitor = RequireMiscVisitor(requireDependencies)
         callExpression.traverse(
           visitor,
           this,
         );
+        requireDependencies
+          .reverse()
+          .forEach((dep, i) => addDefineParam(dep, callExpression, `_$${i}`))
+
         if (!isDefineParamAlreadyPassed('require', callExpression) && visitor.hasUnpassedRequire) {
           addDefineParam('require', callExpression)
         }

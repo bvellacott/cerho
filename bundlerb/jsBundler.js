@@ -11,6 +11,7 @@ const jsBundler = {
         )
       }
     }
+    concat.add(null, `window.define.suspend && window.define.suspend();`)
     for (let i = 0; i < flattenedWithoutPrior.length; i++) {
       const { path, sourceMapFilename, js } = flattenedWithoutPrior[i]
       if (!js) {
@@ -23,8 +24,7 @@ const jsBundler = {
       const { result: { code, map }} = js
       concat.add(sourceMapFilename, code, index.sourcemaps ? map : undefined)
     }
-    module.js = module.js || { result: {} }
-    module.js.result.concat = concat
+    concat.add(null, `window.define.resume && window.define.resume();`)
     if (index.sourcemaps) {
       concat.add(null,
         `//# sourceMappingURL=${basename(module.path)}${index.mapFileSuffix}${index.priorIdsString ?
@@ -32,6 +32,8 @@ const jsBundler = {
           ''}`
       )
     }
+    module.js = module.js || { result: {} }
+    module.js.result.concat = concat
   },
   invalidate: (module) => delete module.js,
   hasCachedResult: module => !!module.js

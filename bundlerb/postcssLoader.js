@@ -21,7 +21,7 @@ const loadCssTarget = api => (module, index) => new Promise((resolve, reject) =>
               result.warn('Unable to resolve import', { node })
             }
             const relativePath = matchResult[1]
-            const dependencyPath = join(dirname(module.path), relativePath)
+            const dependencyPath = `./${join(dirname(module.path), relativePath)}`
             module.css.dependencyPaths.push(dependencyPath)
             node.remove()
           }

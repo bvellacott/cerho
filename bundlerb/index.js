@@ -9,7 +9,6 @@ const { postcssLoader } = require('./postcssLoader')
 const { jsLoader } = require('./jsLoader')
 const { jsTranspilerLoader } = require('./jsTranspilerLoader')
 const { jsBundler } = require('./jsBundler')
-const { cssBundler } = require('./cssBundler')
 const { jsCssBundler } = require('./jsCssBundler')
 
 const api = {
@@ -29,7 +28,6 @@ const api = {
     ],
     bundlers: [
       jsBundler,
-      cssBundler,
       jsCssBundler,
     ],
     aliases: {},
@@ -62,7 +60,7 @@ const api = {
 
   resolveRootModule: async (_modulePath, index, context) => {
     let modulePath = _modulePath.trim()
-    modulePath = modulePath.replace(/^\//, '').replace(new RegExp(`\\${index.mapFileSuffix}$`), '')
+    modulePath = modulePath.replace(/^\//, './').replace(new RegExp(`\\${index.mapFileSuffix}$`), '')
     index.rootModulePath = modulePath
     try {
       const module = await api.resolveModule(modulePath, index, context)
@@ -115,7 +113,7 @@ const api = {
       delete module.resolvingPromise
       return resolvingPromise
     } catch (e) {
-      throw new BBError('Unknown error resolving module - this might be a result of another module not resolving', e)
+      throw new BBError(`Failed to load ${modulePath} - this might be a result of another module not resolving`, e)
     }
   },
 
@@ -158,7 +156,7 @@ const api = {
         Object.keys(priorModules).forEach(id => { ids[id] = true })
         return ids
       }, {})
-
+      
     const alreadyResolved = {}
     const flattenedWithoutPrior = api
       .flatten(module)
@@ -192,34 +190,34 @@ const api = {
       }, []))
   },
 
-  findCircularModules: (module, path = [], circularModules = {}) => {
+  findCircularModules: (module, path = [], circularModules = {}, circularInResolveOrder = []) => {
     let isCircularMember = false; 
     for (let i = 0; i < path.length; i++) {
       const pathMember = path[i]
       if (pathMember === module) {
         isCircularMember = true
       }
-      if (isCircularMember) {
-        pathMember.isCircularMember = isCircularMember
+      if (isCircularMember && !circularModules[pathMember.id]) {
         circularModules[pathMember.id] = pathMember
+        circularInResolveOrder.push(pathMember)
       }
     }
     if (!isCircularMember) {
       module.dependencies.forEach(dependency =>
-        api.findCircularModules(dependency, [...path, module], circularModules)
+        api.findCircularModules(dependency, [...path, module], circularModules, circularInResolveOrder)
       )
     }
-    return circularModules
+    return [circularModules, circularInResolveOrder]
   },
 
-  flattenNonCircular: (module, modules = {}, inResolveOrder = []) => {
+  flattenNonCircular: (module, modules = {}, inResolveOrder = [], circularModules) => {
     modules[module.id] = module
     inResolveOrder.push(module)
     if (module.dependencies) {
       for (let i = module.dependencies.length - 1; i >= 0; i--) {
         const dependency = module.dependencies[i]
-        if (!dependency.isCircularMember) {
-          api.flattenNonCircular(dependency, modules, inResolveOrder)
+        if (!circularModules[dependency.id]) {
+          api.flattenNonCircular(dependency, modules, inResolveOrder, circularModules)
         }
       }
     }
@@ -227,12 +225,10 @@ const api = {
   },
 
   flatten: (module, modules = {}, inResolveOrder = []) => {
-    const circularModules = api.findCircularModules(module)
-    const modulesToFlatten = Object.values(circularModules)
-    if (!circularModules[module.id]) {
-      modulesToFlatten.unshift(module)
-    }
-    modulesToFlatten.forEach(mtf => api.flattenNonCircular(mtf, modules, inResolveOrder))
+    const [circularModules, circularInResolveOrder] = api.findCircularModules(module)
+    const modulesToFlatten = circularInResolveOrder.reverse()
+    modulesToFlatten.unshift(module)
+    modulesToFlatten.forEach(mtf => api.flattenNonCircular(mtf, modules, inResolveOrder, circularModules))
     return inResolveOrder
   },
 

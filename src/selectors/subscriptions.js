@@ -16,7 +16,7 @@ export const getSubscribers = (state) => {
 
 export const getNextFreeRow = (state) => {
   let nextFreeRow;
-  const rows = state.subscriptions.sheet.values
+  const rows = state.subscriptions.sheet.values || []
   for (let i = 1; i < rows.length; i++) {
     const [first_name, last_name, email] = rows[i]
     if (first_name && last_name && email) {

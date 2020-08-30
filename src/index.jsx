@@ -13,7 +13,7 @@ export default (req, res) => {
     <head>
       <title>Cerho</title>
       <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-      <link rel="stylesheet" href="/src/index.jscss" />
+      <link rel="stylesheet" href="src/index.jscss" />
     </head>
     <body>
       <Provider store={store}>
@@ -22,8 +22,8 @@ export default (req, res) => {
       <script>
         {`window.process = {env: {NODE_ENV: '${process.env.NODE_ENV}'}}`}
       </script>
-      <script src="/bequire.js" />
-      <script src="/src/index.js" />
+      <script src="bequire.js" />
+      <script src="src/index.js" />
     </body>
   </html>);
 }

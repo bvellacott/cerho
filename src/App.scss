@@ -1,5 +1,9 @@
 .App {
   text-align: center;
+
+  .thanks-heading {
+    text-align: center;
+  }
   
   &-logo {
     position: relative;
@@ -20,22 +24,26 @@
 
   form {
     display: flex;
+    align-items: center;
     flex-flow: column;
-    margin: 30px 10px;
+    margin: 3rem 1rem;
   }
 
   label {
-    width: 300px;
-    display: inline-flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: center;
-    margin: 10px;
+    width: 100%;
   }
 
   input {
     flex-basis: 60%;
-    margin: 10px;
+    margin: 1rem 0;
+  }
+}
+
+.own-laptop {
+  &__input,
+  &__label {
+    display: inline;
+    vertical-align: middle;
   }
 }
 

@@ -33,19 +33,31 @@ export const authenticate = async () => {
   }
 }
 
+export const clearBearerAndRefreshOnFail = async (f) => {
+  try {
+    return await f()
+  } catch (e) {
+    getLocalStorage().removeItem('Bearer')
+    document.location.reload()
+  }
+}
+
 export const loadSubscriptionsSheet = async () => {
   await authenticate()
-  const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/ilmoittautuneet!A1:E${maxSubscribers + 1}`, {
-    headers: {
-      'Authorization': `Bearer ${getLocalStorage().getItem('Bearer')}`,
-    },
+  return clearBearerAndRefreshOnFail(async () => {
+    const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/ilmoittautuneet!A1:E${maxSubscribers + 1}`, {
+      headers: {
+        'Authorization': `Bearer ${getLocalStorage().getItem('Bearer')}`,
+      },
+    })
+    if (!response.ok) { throw new Error('call failed') }
+    const sheet = await response.json()
+    return {
+      subscriptions: {
+        sheet,
+      },
+    }
   })
-  const sheet = await response.json()
-  return {
-    subscriptions: {
-      sheet,
-    },
-  }
 }
 
 export const setFirstName = (state, firstName) => ({ firstName })
@@ -54,45 +66,52 @@ export const setEmail = (state, email) => ({ email })
 export const setOwnLaptop = (state, ownLaptop) => ({ ownLaptop })
 
 export const subscribe = async (state, firstName, lastName, email, ownLaptop) => {
-  const expiryDate = new Date(Date.now() + (30 * dayInMilliseconds))
-  getLocalStorage().setItem('subscription', JSON.stringify({
-    firstName,
-    lastName,
-    email,
-    ownLaptop,
-  }), expiryDate.toUTCString())
-  const newState = await loadSubscriptionsSheet()
-  const nextFreeRow = getNextFreeRow(newState)
-  const userHasSubscribed = getCurrentUserHasSubscribed(newState)
-  if (nextFreeRow && !userHasSubscribed) {
-    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchUpdate`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${getLocalStorage().getItem('Bearer')}`,
-        'Content-Type': 'application/json'
-      },
-      redirect: 'error',
-      referrerPolicy: 'no-referrer',
-      body: JSON.stringify({
-        valueInputOption: 'RAW',
-        data: {
-          range: `ilmoittautuneet!A${nextFreeRow}:D${nextFreeRow}`,
-          majorDimension: 'ROWS',
-          values: [[firstName, lastName, email, ownLaptop]],
+  await authenticate()
+  return clearBearerAndRefreshOnFail(async () => {
+    const expiryDate = new Date(Date.now() + (30 * dayInMilliseconds))
+    getLocalStorage().setItem('subscription', JSON.stringify({
+      firstName,
+      lastName,
+      email,
+      ownLaptop,
+    }), expiryDate.toUTCString())
+    const newState = await loadSubscriptionsSheet()
+    const nextFreeRow = getNextFreeRow(newState)
+    const userHasSubscribed = getCurrentUserHasSubscribed(newState)
+    if (nextFreeRow && !userHasSubscribed) {
+      const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchUpdate`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${getLocalStorage().getItem('Bearer')}`,
+          'Content-Type': 'application/json'
         },
-      }),
-    })
-    return await loadSubscriptionsSheet()
-  }
+        redirect: 'error',
+        referrerPolicy: 'no-referrer',
+        body: JSON.stringify({
+          valueInputOption: 'RAW',
+          data: {
+            range: `ilmoittautuneet!A${nextFreeRow}:D${nextFreeRow}`,
+            majorDimension: 'ROWS',
+            values: [[firstName, lastName, email, ownLaptop]],
+          },
+        }),
+      })
+      if (!response.ok) { throw new Error('call failed') }
+      return await loadSubscriptionsSheet()
+    }
+  });
 }
 
 export const clearUserData = async () => {
-  getLocalStorage().removeItem('subscription')
-  return {
-    ...loadSubscriptionsSheet(),
-    firstName: undefined,
-    lastName: undefined,
-    email: undefined,
-    ownLaptop: undefined,
-  }
+  await authenticate()
+  return clearBearerAndRefreshOnFail(async () => {
+    getLocalStorage().removeItem('subscription')
+    return {
+      ...loadSubscriptionsSheet(),
+      firstName: undefined,
+      lastName: undefined,
+      email: undefined,
+      ownLaptop: undefined,
+    }
+  });
 }

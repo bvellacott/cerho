@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cerho
+  labels:
+    app: cerho
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cerho
+  template:
+    metadata:
+      labels:
+        app: cerho
+    spec:
+      containers:
+      - name: cerho
+        image: bvellacott/cerho:1.0.1
+        ports:
+        - containerPort: 4000

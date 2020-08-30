@@ -73,31 +73,30 @@ function App({
   return (
     <div className="App">
       <main>
-        <img src="/src/logo.svg" className="App-logo" alt="logo" />
+        <img src="src/logo.svg" className="App-logo" alt="logo" />
         {userHasSubscribed && (
           <>
-            <h1>Lielahden kirkon koodaus kerho</h1>
-            <h2>Ti. 7.4.2020</h2>
-            <h2>Klo. 18:00</h2>
-            <h2>Kiitos osallistumisestasi {firstName}!</h2>
+            <h1 className="thanks-heading">Kiitos osallistumisestasi!</h1>
             <form onSubmit={onClearUserData}>
               <button>Ilmoita kaverisikin</button>
             </form>
+            <h2>Ti. 7.4.2020</h2>
+            <h2>Klo. 18:00</h2>
           </>
         )}
         {!userHasSubscribed && !subscriptionsAvailable && (
           <>
             <h1>Lielahden kirkon koodaus kerho</h1>
-            <h2>Ti. 7.4.2020</h2>
-            <h2>Klo. 18:00</h2>
+            <h2>Ti. 1.9.2020</h2>
+            <h2>Klo. 17:30</h2>
             <h2>Valitettavasti emme ota enää ilmoittautumisia vastaan</h2>
           </>
         )}
         {!userHasSubscribed && !!subscriptionsAvailable && (
           <>
             <h1>Ilmoittaudu Lielahden kirkon koodaus kerhoon</h1>
-            <h2>Ti. 7.4.2020</h2>
-            <h2>Klo. 18:00</h2>
+            <h2>Ti. 1.9.2020</h2>
+            <h2>Klo. 17:30</h2>
             <h2>Ilmoittautuneita: {subscribers.length}</h2>
             <h2>Vapaita paikkoja: {placesAvailable}</h2>
             {!placesAvailable && (
@@ -108,7 +107,7 @@ function App({
             )}
             <form onSubmit={onSubmit}>
               <label for="first-name">Etunimi
-                <input id="first-name" type="text" value={firstName} onChange={({ target }) => setFirstName('sdfsdf')} />
+                <input id="first-name" type="text" value={firstName} onChange={({ target }) => setFirstName(target.value)} />
               </label>
               <label for="last-name">Sukunimi
                 <input id="last-name" type="text" value={lastName} onChange={({ target }) => setLastName(target.value)} />
@@ -117,13 +116,20 @@ function App({
                 <input id="email" type="email" value={email} onChange={({ target }) => setEmail(target.value)} />
               </label>
               <label for="own-laptop">
-                <span><input id="own-laptop" type="checkbox" value={ownLaptop} onChange={({ target }) => setOwnLaptop(target.value)} /> Oma läppäri</span>
+                <input
+                  id="own-laptop"
+                  className="own-laptop__input"
+                  type="checkbox"
+                  value={ownLaptop}
+                  onChange={({ target }) => setOwnLaptop(target.value)}
+                />
+                <span className="own-laptop__label"> Oma läppäri</span>
               </label>
               <button>Ilmoittaudu</button>
             </form>
             <p>Kaikki yli seitsemäm vuotiaat ovat tervetulleita ja tavoitteena on saada kerhoon noin kymmen lasta sekä viisi aikuista.</p>
             <p>Keskitymme JavaScript kielen opetteluun, mutta tunnit räätälöidään jokaiselle taitotason ja kiinnostuksen kohteiden mukaan</p>
-            <p>Voit tuoda oman koneen mukaan ja kerholla on kymmenen läppäriä käytettävissä jotka saa viedä kotiin mukaan 20€ panttia vastaan.</p>
+            <p>Voit tuoda oman koneen mukaan ja kerholla on joitakin läppäreitä käytettävissä jotka saa viedä kotiin mukaan 20€ panttia vastaan.</p>
           </>
         )}
       </main>

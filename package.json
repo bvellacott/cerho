@@ -43,7 +43,7 @@
     "bueno-repo": "^1.0.4",
     "concat-with-sourcemaps": "^1.1.0",
     "cssnano": "^4.1.10",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "node-libs-browser": "^2.2.1",
     "node-watch": "^0.6.3",
     "pirates": "^4.0.1",
